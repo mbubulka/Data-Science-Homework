@@ -580,6 +580,32 @@
         // Initialize dashboard when page loads
         document.addEventListener('DOMContentLoaded', function() {
             new PotomacDashboard();
+            
+            // Send height to parent window for responsive iframe
+            function sendHeight() {
+                if (window.self !== window.top) {
+                    const height = Math.max(
+                        document.body.scrollHeight,
+                        document.body.offsetHeight,
+                        document.documentElement.clientHeight,
+                        document.documentElement.scrollHeight,
+                        document.documentElement.offsetHeight
+                    );
+                    window.parent.postMessage({
+                        type: 'iframe-height',
+                        height: height,
+                        source: 'potomac-dashboard'
+                    }, '*');
+                    console.log('Sent height to parent:', height);
+                }
+            }
+            
+            // Send height initially and when content changes
+            setTimeout(sendHeight, 1000);
+            setTimeout(sendHeight, 3000);
+            
+            // Send height when window is resized
+            window.addEventListener('resize', sendHeight);
         });
     </script>
 </body>
