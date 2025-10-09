@@ -1,0 +1,57 @@
+# R specific
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+.Renviron
+.Rprofile
+
+# Package development files
+*.tar.gz
+*.Rcheck/
+
+# Output files
+*.html
+*.pdf
+*.docx
+*.pptx
+*.tex
+*.log
+*.aux
+*.out
+*.toc
+
+# Data files (if large)
+*.csv
+*.rds
+*.rda
+*.rdata
+*.feather
+*.parquet
+*.sqlite
+*.db
+
+# Temporary files
+*.tmp
+*~
+.DS_Store
+Thumbs.db
+
+# Shiny deployment
+rsconnect/
+
+# Environment configuration
+config.yml
+.env
+
+# Logs
+logs/
+*.log
+
+# Cached data
+cache/
+
+# IDE specific files
+.idea/
+.vscode/
