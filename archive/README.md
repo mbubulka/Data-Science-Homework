@@ -18,7 +18,7 @@ This folder contains the development iterations of the Little Falls Dashboard, p
 - `little_falls_dashboard_simple.R` - Simplified error-free alternative
 
 ## Final Version
-The current production version is `../little_falls_dashboard.R` (renamed from `little_falls_dashboard_professional.R`), which successfully combines:
+The current production version is `../little_falls_dashboard_professional.R`, which successfully combines:
 
 - ✅ Error-free functionality
 - ✅ Professional Tufte-inspired design

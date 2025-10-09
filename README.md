@@ -43,7 +43,12 @@ This project is organized as an R package with the following structure:
 - `R/potomac-package.R` - Package documentation
 
 ### Analysis
-- `analysis/potomac_river_analysis.Rmd` - Comprehensive watershed analysis and modeling
+- `potomac_river_analysis.Rmd` - Comprehensive watershed analysis and modeling
+- `enhanced_potomac_predictor.R` - Core prediction engine with USGS data integration
+
+### Dashboard Application
+- `little_falls_dashboard_professional.R` - Production-ready Tufte-inspired dashboard
+- `test_final_dashboard.R` - Testing script for dashboard validation
 
 ### Documentation
 - `man/` - Function documentation (generated from roxygen comments)
@@ -149,7 +154,10 @@ rmarkdown::render(system.file("analysis/potomac_river_analysis.Rmd", package = "
 
 ### Launching the Dashboard
 ```r
-# Run the Little Falls dashboard
+# Run the professional Tufte-inspired dashboard
+source("little_falls_dashboard_professional.R")
+
+# Or use the package function (if installed)
 run_dashboard()
 ```
 
