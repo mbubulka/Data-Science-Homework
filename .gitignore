@@ -5,6 +5,14 @@
 .Ruserdata
 *.Rproj
 .Renviron
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# R Environment
 .Rprofile
 
 # Package development files

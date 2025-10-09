@@ -33,24 +33,44 @@ This project provides **predictive analytics for kayaking safety** on the Potoma
 
 **Our Solution:** Predictive intelligence that enables advance trip planning with 7-day safety forecasts, reducing cancellations and improving safety outcomes.
 
-## Package Structure
+## Project Structure
 
-This project is organized as an R package with the following structure:
+This project is organized as a professional R package with clear separation of concerns:
+
+```
+potomac-river-analysis/
+├── 📱 app/                    # Main application files
+│   ├── little_falls_dashboard_professional.R
+│   ├── enhanced_potomac_predictor.R
+│   └── test_final_dashboard.R
+├── 📊 analysis/               # Research and analysis
+│   └── potomac_river_analysis.Rmd
+├── 📁 archive/                # Development history
+├── 🏗️  R/                     # Package functions
+├── 📚 docs/                   # Documentation
+├── 🧪 tests/                  # Unit tests
+├── 📈 figures/                # Generated plots
+├── 💾 data/                   # Package data
+├── 🔧 inst/                   # Installed files
+├── 👥 man/                    # Function documentation
+└── ⚙️  .github/               # CI/CD workflows
+```
 
 ### R Functions
 - `R/predictor.R` - Core prediction functions
 - `R/dashboard.R` - Dashboard UI and server logic
 - `R/potomac-package.R` - Package documentation
 
-### Analysis
-- `potomac_river_analysis.Rmd` - Comprehensive watershed analysis and modeling
-- `enhanced_potomac_predictor.R` - Core prediction engine with USGS data integration
+### Core Application
+- `app/little_falls_dashboard_professional.R` - Production-ready Tufte-inspired dashboard
+- `app/enhanced_potomac_predictor.R` - Core prediction engine with USGS data integration
+- `app/test_final_dashboard.R` - Testing script for dashboard validation
 
-### Dashboard Application
-- `little_falls_dashboard_professional.R` - Production-ready Tufte-inspired dashboard
-- `test_final_dashboard.R` - Testing script for dashboard validation
+### Analysis & Research
+- `analysis/potomac_river_analysis.Rmd` - Comprehensive watershed analysis and modeling
 
 ### Documentation
+- `docs/` - Project documentation and design analysis
 - `man/` - Function documentation (generated from roxygen comments)
 - `inst/` - Installed files (including APA7 citation formatting and bibliography)
 - `README.md` - Project overview and usage instructions
@@ -155,7 +175,7 @@ rmarkdown::render(system.file("analysis/potomac_river_analysis.Rmd", package = "
 ### Launching the Dashboard
 ```r
 # Run the professional Tufte-inspired dashboard
-source("little_falls_dashboard_professional.R")
+source("app/little_falls_dashboard_professional.R")
 
 # Or use the package function (if installed)
 run_dashboard()
