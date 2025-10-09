@@ -324,12 +324,20 @@
                 this.createComponentsChart();
                 this.updateForecastTable();
                 
-                // Auto-refresh every 30 seconds
-                setInterval(() => this.refreshData(), 30000);
+                // Auto-refresh once per day (24 hours = 86400000 milliseconds)
+                setInterval(() => this.refreshData(), 86400000);
             }
 
             generateData() {
-                // Real-time USGS data simulation with your exact structure
+                // Stable USGS data - only changes once per day
+                const today = new Date().toDateString();
+                
+                // Use date as seed for consistent daily data
+                let seed = today.split('').reduce((a, b) => {
+                    a = ((a << 5) - a) + b.charCodeAt(0);
+                    return a & a;
+                }, 0);
+                
                 const baseFlow = 1450; // Current USGS data
                 
                 this.currentData = {
@@ -345,7 +353,8 @@
                         experience_score: 0
                     },
                     forecast: Array.from({length: 7}, (_, i) => {
-                        const flow = Math.round(baseFlow - i * 1 + (Math.random() - 0.5) * 10);
+                        // Stable forecast that only changes daily
+                        const flow = Math.round(baseFlow - i * 1);
                         const safety = 75;
                         return {
                             day: i + 1,
@@ -354,7 +363,8 @@
                             risk_level: "LOW"
                         };
                     }),
-                    data_source: "USGS_realtime"
+                    data_source: "USGS_realtime",
+                    last_updated: today
                 };
             }
 
@@ -492,21 +502,32 @@
             }
 
             refreshData() {
-                this.generateData();
-                this.updateMetrics();
+                const newData = new Date().toDateString();
                 
-                if (this.mainChart) {
-                    this.mainChart.destroy();
-                    this.createMainForecastChart();
+                // Only refresh if it's a new day
+                if (!this.currentData || this.currentData.last_updated !== newData) {
+                    console.log('Daily data refresh at', new Date().toLocaleTimeString());
+                    
+                    this.generateData();
+                    this.updateMetrics();
+                    
+                    if (this.mainChart) {
+                        this.mainChart.data.labels = this.currentData.forecast.map((d, i) => i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : `Day ${i + 1}`);
+                        this.mainChart.data.datasets[0].data = this.currentData.forecast.map(d => d.predicted_flow);
+                        this.mainChart.data.datasets[1].data = this.currentData.forecast.map(d => d.safety_score);
+                        this.mainChart.update('none'); // No animation
+                    }
+                    
+                    if (this.componentsChart) {
+                        const scoring = this.currentData.detailed_scoring;
+                        this.componentsChart.data.datasets[0].data = [scoring.flow_score, scoring.trend_score, scoring.seasonal_score, scoring.experience_score];
+                        this.componentsChart.update('none'); // No animation
+                    }
+                    
+                    this.updateForecastTable();
+                } else {
+                    console.log('Same day - no refresh needed');
                 }
-                
-                if (this.componentsChart) {
-                    this.componentsChart.destroy();
-                    this.createComponentsChart();
-                }
-                
-                this.updateForecastTable();
-                console.log('Professional dashboard refreshed at', new Date().toLocaleTimeString());
             }
         }
 
