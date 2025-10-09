@@ -1,0 +1,59 @@
+name: Update Potomac Dashboard
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Update every 6 hours
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup R
+      uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: '4.3'
+        
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+    
+    - name: Setup R dependencies
+      uses: r-lib/actions/setup-r-dependencies@v2
+      with:
+        packages: |
+          any::flexdashboard
+          any::ggplot2
+          any::dplyr
+          any::DT
+          any::plotly
+          any::dataRetrieval
+          any::lubridate
+          any::rmarkdown
+          any::knitr
+    
+    - name: Render Dashboard
+      run: |
+        cd deploy
+        Rscript -e "rmarkdown::render('potomac_dashboard.Rmd', output_file = 'index.html')"
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./deploy
+        publish_branch: gh-pages
+        
+    - name: Create deployment summary
+      run: |
+        echo "## 🌊 Potomac Dashboard Deployment" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: Successfully deployed" >> $GITHUB_STEP_SUMMARY
+        echo "- **URL**: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/" >> $GITHUB_STEP_SUMMARY
+        echo "- **Last Updated**: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Integration**: Ready for bubulkaanalytics.com iframe" >> $GITHUB_STEP_SUMMARY

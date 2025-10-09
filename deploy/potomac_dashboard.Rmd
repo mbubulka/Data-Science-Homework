@@ -1,0 +1,367 @@
+---
+title: "Potomac River Safety Analysis Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    theme: cosmo
+    css: custom.css
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(ggplot2)
+library(dplyr)
+library(DT)
+library(plotly)
+
+# Try to load advanced packages
+use_advanced_features <- TRUE
+tryCatch({
+  library(dataRetrieval)
+  library(lubridate)
+}, error = function(e) {
+  use_advanced_features <<- FALSE
+})
+
+# Get Potomac data
+get_potomac_data <- function() {
+  if (!use_advanced_features) {
+    base_flow <- sample(c(1800, 2200, 2600, 3000, 2400), 1)
+    return(list(
+      flow_cfs = base_flow + rnorm(1, 0, 200),
+      trend_cfs = rnorm(1, 0, 75),
+      data_source = "demo_mode",
+      success = TRUE,
+      timestamp = Sys.time()
+    ))
+  }
+  
+  tryCatch({
+    current_data <- dataRetrieval::readNWISuv(
+      siteNumbers = "01646500",
+      parameterCd = "00060",
+      startDate = Sys.Date() - 7,
+      endDate = Sys.Date()
+    )
+    
+    if(nrow(current_data) > 0) {
+      flows <- current_data$X_00060_00000
+      current_flow <- tail(flows, 1)
+      recent_flows <- tail(flows, min(96, length(flows)))
+      trend_cfs <- if(length(recent_flows) > 10) {
+        (tail(recent_flows, 1) - head(recent_flows, 1)) / length(recent_flows) * 96
+      } else { 0 }
+      
+      return(list(
+        flow_cfs = current_flow,
+        trend_cfs = trend_cfs,
+        data_source = "USGS_live",
+        success = TRUE,
+        timestamp = Sys.time()
+      ))
+    }
+  }, error = function(e) {
+    # Fallback to demo
+  })
+  
+  # Demo fallback
+  base_flow <- sample(c(1800, 2200, 2600, 3000, 2400), 1)
+  return(list(
+    flow_cfs = base_flow + rnorm(1, 0, 200),
+    trend_cfs = rnorm(1, 0, 75),
+    data_source = "demo_fallback",
+    success = TRUE,
+    timestamp = Sys.time()
+  ))
+}
+
+# Safety scoring
+calculate_safety_score <- function(flow_cfs, trend_cfs = 0) {
+  if (flow_cfs < 800) {
+    flow_score <- 0
+  } else if (flow_cfs < 1200) {
+    flow_score <- 15
+  } else if (flow_cfs < 2000) {
+    flow_score <- 35
+  } else if (flow_cfs < 3000) {
+    flow_score <- 40
+  } else if (flow_cfs < 4000) {
+    flow_score <- 30
+  } else {
+    flow_score <- 10
+  }
+  
+  if (trend_cfs < -200) {
+    trend_score <- 10
+  } else if (trend_cfs < -50) {
+    trend_score <- 20
+  } else if (trend_cfs < 50) {
+    trend_score <- 30
+  } else if (trend_cfs < 200) {
+    trend_score <- 25
+  } else {
+    trend_score <- 15
+  }
+  
+  current_month <- as.numeric(format(Sys.Date(), "%m"))
+  if (current_month %in% c(12, 1, 2)) {
+    seasonal_score <- 10
+  } else if (current_month %in% c(3, 4, 5)) {
+    seasonal_score <- 20
+  } else if (current_month %in% c(6, 7, 8)) {
+    seasonal_score <- 15
+  } else {
+    seasonal_score <- 18
+  }
+  
+  experience_score <- 5
+  total_score <- flow_score + trend_score + seasonal_score + experience_score
+  
+  list(
+    total = min(total_score, 100),
+    flow_score = flow_score,
+    trend_score = trend_score,
+    seasonal_score = seasonal_score,
+    experience_score = experience_score
+  )
+}
+
+# Generate forecast
+generate_forecast <- function(base_flow, base_trend = 0) {
+  flows <- numeric(7)
+  flows[1] <- base_flow
+  
+  for(i in 2:7) {
+    trend_component <- base_trend * 0.1
+    seasonal_component <- sin(2 * pi * i / 365) * 30
+    mean_reversion <- (2000 - flows[i-1]) * 0.02
+    random_component <- rnorm(1, mean = mean_reversion, sd = 150)
+    change <- trend_component + seasonal_component + random_component
+    flows[i] <- max(500, flows[i-1] + change)
+  }
+  
+  scores <- numeric(7)
+  risks <- character(7)
+  
+  for(i in 1:7) {
+    trend_for_day <- if(i == 1) base_trend else (flows[i] - flows[max(1, i-1)]) * 96
+    safety_result <- calculate_safety_score(flows[i], trend_for_day)
+    scores[i] <- safety_result$total
+    
+    if (scores[i] >= 80) {
+      risks[i] <- "EXCELLENT"
+    } else if (scores[i] >= 65) {
+      risks[i] <- "GOOD"
+    } else if (scores[i] >= 45) {
+      risks[i] <- "MODERATE"
+    } else {
+      risks[i] <- "POOR"
+    }
+  }
+  
+  data.frame(
+    day = 1:7,
+    predicted_flow = round(flows, 0),
+    safety_score = round(scores, 0),
+    risk_level = risks,
+    trend_indicator = c("Current", rep("Forecast", 6))
+  )
+}
+
+# Get current analysis
+data_result <- get_potomac_data()
+safety_metrics <- calculate_safety_score(data_result$flow_cfs, data_result$trend_cfs)
+
+if (safety_metrics$total >= 80) {
+  risk_level <- "EXCELLENT"
+} else if (safety_metrics$total >= 65) {
+  risk_level <- "GOOD"
+} else if (safety_metrics$total >= 45) {
+  risk_level <- "MODERATE"
+} else {
+  risk_level <- "POOR"
+}
+
+current_conditions <- list(
+  flow_cfs = round(data_result$flow_cfs, 0),
+  safety_score = safety_metrics$total,
+  risk_level = risk_level,
+  trend_cfs = round(data_result$trend_cfs, 1),
+  timestamp = data_result$timestamp
+)
+
+forecast_data <- generate_forecast(data_result$flow_cfs, data_result$trend_cfs)
+```
+
+# Potomac River Safety Dashboard {.sidebar}
+
+**🌊 Little Falls Analysis**
+
+**Current Conditions:**
+- **Flow:** `r format(current_conditions$flow_cfs, big.mark = ",")` cfs
+- **Safety Score:** `r current_conditions$safety_score`/100
+- **Risk Level:** `r current_conditions$risk_level`
+- **Data Source:** `r if(data_result$data_source == "USGS_live") "🟢 USGS Live" else "🟡 Demo Mode"`
+
+**Last Updated:** `r format(current_conditions$timestamp, "%Y-%m-%d %H:%M")`
+
+---
+
+**🔗 Part of bubulkaanalytics.com**  
+*Analytics Dashboard Portfolio*
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### 📈 7-Day Flow & Safety Forecast
+
+```{r forecast_plot}
+flow_scale <- max(forecast_data$predicted_flow) / 100
+
+p <- ggplot(forecast_data, aes(x = day)) +
+  geom_line(aes(y = predicted_flow), color = "#667eea", size = 1.5, alpha = 0.9) +
+  geom_point(aes(y = predicted_flow), color = "#667eea", size = 3.5, alpha = 0.9) +
+  geom_area(aes(y = safety_score * flow_scale), fill = "#764ba2", alpha = 0.25) +
+  geom_line(aes(y = safety_score * flow_scale), color = "#764ba2", size = 1.5, alpha = 0.9) +
+  geom_point(aes(y = safety_score * flow_scale), color = "#764ba2", size = 3.5, alpha = 0.9) +
+  geom_text(aes(y = predicted_flow + max(predicted_flow) * 0.06, 
+               label = substr(risk_level, 1, 1)),
+           color = ifelse(forecast_data$risk_level == "EXCELLENT", "#27ae60",
+                         ifelse(forecast_data$risk_level == "GOOD", "#f39c12",
+                               ifelse(forecast_data$risk_level == "MODERATE", "#e67e22", "#e74c3c"))),
+           size = 4.5, fontface = "bold") +
+  scale_y_continuous(
+    name = "Flow Rate (cfs)",
+    labels = function(x) format(x, big.mark = ","),
+    sec.axis = sec_axis(~ . / flow_scale, name = "Safety Score", breaks = seq(0, 100, 25))
+  ) +
+  labs(
+    title = "7-Day Flow Rate & Safety Score Forecast",
+    subtitle = paste("Current:", format(current_conditions$flow_cfs, big.mark = ","), 
+                    "cfs | Score:", current_conditions$safety_score, 
+                    "| Risk:", current_conditions$risk_level),
+    x = "Days Ahead"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(color = "#2c3e50", face = "bold", size = 16),
+    plot.subtitle = element_text(color = "#495057", size = 12),
+    axis.text = element_text(color = "#495057"),
+    axis.title = element_text(color = "#495057", face = "bold"),
+    axis.title.y.right = element_text(color = "#764ba2"),
+    axis.title.y.left = element_text(color = "#667eea"),
+    panel.background = element_rect(fill = "white", color = NA),
+    panel.grid.minor = element_blank(),
+    legend.position = "none"
+  ) +
+  geom_hline(yintercept = c(800, 2000, 3000), linetype = "dashed", alpha = 0.4, color = "#95a5a6")
+
+ggplotly(p, tooltip = c("x", "y"))
+```
+
+### 📋 7-Day Forecast Table
+
+```{r forecast_table}
+forecast_display <- forecast_data
+forecast_display$Day <- ifelse(forecast_display$day == 1, "Today",
+                              ifelse(forecast_display$day == 2, "Tomorrow",
+                                     paste("Day", forecast_display$day)))
+forecast_display$`Flow Rate` <- paste0(format(forecast_display$predicted_flow, big.mark = ","), " cfs")
+forecast_display$`Safety Score` <- paste0(forecast_display$safety_score, "/100")
+
+DT::datatable(
+  forecast_display[, c("Day", "Flow Rate", "Safety Score", "risk_level", "trend_indicator")],
+  colnames = c("Day", "Flow Rate", "Safety Score", "Risk Level", "Status"),
+  options = list(pageLength = 7, dom = 't', ordering = FALSE),
+  rownames = FALSE
+) %>%
+  DT::formatStyle(
+    "risk_level",
+    backgroundColor = DT::styleEqual(
+      c("EXCELLENT", "GOOD", "MODERATE", "POOR"),
+      c("#d4edda", "#fff3cd", "#f8d7da", "#f5c6cb")
+    )
+  )
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### ⚖️ Safety Component Breakdown
+
+```{r components_plot}
+components_data <- data.frame(
+  Component = c("Flow\nSafety", "Trend\nStability", "Seasonal\nFactor", "Experience\nBonus"),
+  Score = c(safety_metrics$flow_score, safety_metrics$trend_score, 
+           safety_metrics$seasonal_score, safety_metrics$experience_score),
+  Max = c(40, 30, 20, 10)
+)
+
+components_data$Percentage <- (components_data$Score / components_data$Max) * 100
+components_data$Color <- ifelse(components_data$Percentage >= 80, "#27ae60",
+                               ifelse(components_data$Percentage >= 60, "#f39c12",
+                                     ifelse(components_data$Percentage >= 40, "#e67e22", "#e74c3c")))
+
+p2 <- ggplot(components_data, aes(x = reorder(Component, Score), y = Score, fill = Color)) +
+  geom_col(width = 0.7, alpha = 0.8) +
+  geom_text(aes(label = paste0(Score, "/", Max, "\n(", round(Percentage, 0), "%)")), 
+            hjust = -0.1, color = "#2c3e50", fontface = "bold", size = 3.2) +
+  coord_flip() +
+  labs(title = "Safety Component Breakdown",
+       subtitle = paste("Total Score:", sum(components_data$Score), "/ 100"),
+       x = NULL, y = "Points Awarded") +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(color = "#2c3e50", face = "bold", size = 14),
+    plot.subtitle = element_text(color = "#495057", size = 11),
+    panel.background = element_rect(fill = "white", color = NA),
+    legend.position = "none"
+  ) +
+  scale_fill_identity() +
+  ylim(0, max(components_data$Max) * 1.4)
+
+ggplotly(p2)
+```
+
+### 📊 Current Assessment
+
+**Risk Assessment:**
+```{r risk_text}
+risk_text <- if (current_conditions$risk_level == "EXCELLENT") {
+  "Ideal conditions for kayaking. All skill levels appropriate."
+} else if (current_conditions$risk_level == "GOOD") {
+  "Good conditions with minor considerations. Suitable for most paddlers."
+} else if (current_conditions$risk_level == "MODERATE") {
+  "Moderate conditions requiring attention. Intermediate+ skills recommended."
+} else {
+  "Poor conditions. Advanced skills required or consider postponing."
+}
+```
+
+`r risk_text`
+
+**Recommendations:**
+```{r recommendations}
+flow <- current_conditions$flow_cfs
+trend <- current_conditions$trend_cfs
+
+rec_text <- if (flow < 1200) {
+  "Low water conditions - Watch for exposed rocks."
+} else if (flow > 3500) {
+  "High water conditions - Expect strong currents."
+} else {
+  "Flow within normal recreational range."
+}
+
+if (abs(trend) > 100) {
+  rec_text <- paste(rec_text, "Rapidly changing conditions - Monitor closely.")
+}
+```
+
+`r rec_text`
+
+**System Status:**
+- Data Source: `r if(data_result$data_source == "USGS_live") "USGS Live Feed" else "Demo Mode"`
+- Station ID: 01646500
+- Last Update: `r format(current_conditions$timestamp, "%H:%M:%S")`
