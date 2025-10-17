@@ -32,7 +32,7 @@ That experience changed everything. I realized: *The data existed to predict thi
 
 # The Incident Timeline
 
-```{r personal-story-moment, fig.width=11, fig.height=5.5, fig.cap="Figure 1. The incident timeline: Water levels rose unpredictably. Real-time integrated data and upstream forecasting would have prevented the emergency."}
+```{r personal-story-moment, fig.width=11, fig.height=5.5, fig.cap="Figure 1. The incident timeline: Water levels rose unpredictably. Real-time integrated data and upstream forecasting would have prevented the emergency (Bubulka, 2025)."}
 incident_data <- data.frame(
   time = c("Start", "30 min", "60 min", "Rescue"),
   flow = c(3200, 3400, 5200, 6800),
@@ -80,7 +80,7 @@ ggplot(incident_data, aes(x = factor(time, levels = c("Start", "30 min", "60 min
 
 # Current Cost of Failure
 
-```{r problem-gap, fig.width=11, fig.height=5.5, fig.cap="Figure 2. The information gap: available data sources vs. accessible safety information. Current users only see raw USGS numbers."}
+```{r problem-gap, fig.width=11, fig.height=5.5, fig.cap="Figure 2. The information gap: available data sources vs. accessible safety information. Current users only see raw USGS numbers (Bubulka, 2025)."}
 data_gap <- data.frame(
   source = c("USGS", "History", "Dam Ops", "Weather", "Decision"),
   available_val = c(100, 100, 100, 100, 0),
@@ -108,9 +108,11 @@ ggplot(data_gap_long, aes(x = reorder(source, value), y = value, fill = status))
         panel.grid.minor = element_blank())
 ```
 
-### Impact Statistics:
-- **44-58 rescues/year** at Great Falls alone
-- **45 min avg response time** (sometimes fatal)
+### Impact Statistics (Simulated):
+*Rescue and response data simulated based on regional patterns—actual public records were unavailable.*
+
+- **44-58 rescues/year** at Great Falls alone (estimated from regional patterns)
+- **45 min avg response time** (estimated emergency response baseline)
 - **Tourism impact**: Users avoid when uncertain
 - **Emergency services drain** on preventable calls
 
@@ -143,7 +145,7 @@ ggplot(data_gap_long, aes(x = reorder(source, value), y = value, fill = status))
 
 # Solution Architecture
 
-```{r solution-flow, fig.width=11, fig.height=5.5, fig.cap="Figure 3. Solution architecture: Data sources flow through analytics engine to user dashboard. Upstream stations validate predictions in real-time."}
+```{r solution-flow, fig.width=11, fig.height=5.5, fig.cap="Figure 3. Solution architecture: Data sources flow through analytics engine to user dashboard. Upstream stations validate predictions in real-time (Bubulka, 2025)."}
 data_sources <- c("USGS\nFlows", "Historical\nData", "Weather\nForecasts", "Dam\nSchedules")
 processing <- c("Data\nCleaning", "ARIMA\nModel", "Validation\nLogic", "Safety\nScore")
 output <- c("Current\nConditions", "7-Day\nForecast", "Risk\nAssessment", "User\nAlert")
@@ -270,7 +272,7 @@ text(0.5, 0.1, "Model Accuracy: 95% (24-hr) | 82% (7-day) | Validation Framework
 
 # Data Foundation: Three-Station USGS Network
 
-```{r data-foundation, fig.width=11, fig.height=5.5, fig.cap="Figure 8. Three-station USGS network: Point of Rocks validation (upstream), Little Falls predictions (primary), Harpers Ferry validation (downstream)."}
+```{r data-foundation, fig.width=11, fig.height=5.5, fig.cap="Figure 8. Three-station USGS network: Point of Rocks validation (upstream), Little Falls predictions (primary), Harpers Ferry validation (downstream). Data source: USGS Water Data (waterdata.usgs.gov), visualization by Bubulka (2025)."}
 stations_data <- data.frame(
   station = c("Point of Rocks\n(01638500)", "Little Falls\n(01646500)\nPREDICTION", "Harpers Ferry\n(01636500)"),
   x = c(1, 2, 3),
@@ -310,7 +312,7 @@ ggplot(stations_data, aes(x = x, y = flow)) +
 
 # Business Impact: Before vs After
 
-```{r impact-comparison, fig.width=11, fig.height=5.5, fig.cap="Figure 9. Business impact metrics: 24% rescue reduction, 33% faster response times, 20% increase in tourism confidence."}
+```{r impact-comparison, fig.width=11, fig.height=5.5, fig.cap="Figure 9. Business impact metrics: 24% rescue reduction, 33% faster response times, 20% increase in tourism confidence. Projections based on simulated rescue data and regional tourism market analysis (Bubulka, 2025)."}
 impact_data <- data.frame(
   metric = rep(c("Rescues/Year", "Response Time (min)", "Tourism Confidence (%)"), 2),
   value = c(58, 45, 0, 44, 30, 20),
@@ -340,7 +342,7 @@ ggplot(impact_data, aes(x = reorder(metric, c(1, 2, 3, 1, 2, 3)), y = value, fil
 
 # Model Performance & Accuracy
 
-```{r accuracy-metrics, fig.width=11, fig.height=5.5, fig.cap="Figure 10. ARIMA model forecast accuracy by prediction horizon. Green bars exceed target (80%), showing model reliability."}
+```{r accuracy-metrics, fig.width=11, fig.height=5.5, fig.cap="Figure 10. ARIMA model forecast accuracy by prediction horizon. Model performance based on 50+ years of USGS historical flow data and cross-validation testing (Bubulka, 2025)."}
 accuracy_data <- data.frame(
   timeframe = factor(c("24-hour", "7-day"), levels = c("24-hour", "7-day")),
   accuracy = c(95, 82),
@@ -395,7 +397,7 @@ ggplot(accuracy_data, aes(x = timeframe, y = accuracy)) +
 
 # ROI Five-Year Projection
 
-```{r cost-benefit, fig.width=11, fig.height=5.5, fig.cap="Figure 11. Five-year ROI projection showing rapid break-even and cumulative benefit. System pays for itself in first quarter."}
+```{r cost-benefit, fig.width=11, fig.height=5.5, fig.cap="Figure 11. Five-year ROI projection showing rapid break-even and cumulative benefit. Financial projections based on simulated rescue reduction (24%) and estimated regional tourism market impacts (Bubulka, 2025)."}
 years <- 0:5
 costs <- c(36, 6, 6, 6, 6, 6)
 benefits <- c(0, 754, 754, 754, 754, 754)
@@ -562,6 +564,37 @@ But here's what matters most: This is data science with real purpose. It's not b
 "The data exists. The methods work. The market is ready. We're building the connection that saves lives. And that connection replicates across every river where people paddle, every emergency service that responds, every community that values safety.
 
 This is what it looks like when analytics solves real problems."
+
+---
+
+# References & Data Sources
+
+## Primary Data Sources
+- **USGS Water Data for the Nation**. (2025). Real-time water measurements for Potomac River stations:
+  - Station 01646500: Potomac River at Little Falls, MD
+  - Station 01638500: Potomac River at Point of Rocks, MD
+  - Station 01636500: Potomac River near Harpers Ferry, WV
+  - Retrieved from https://waterdata.usgs.gov/
+
+## Methodology & Technical References
+- **Box, G.E.P., Jenkins, G.M., Reinsel, G.C., & Ljung, G.M.** (2015). *Time Series Analysis: Forecasting and Control* (5th ed.). Wiley-Interscience.
+
+- **Hyndman, R.J., & Athanasopoulos, G.** (2021). *Forecasting: Principles and Practice* (3rd ed.). OTexts. https://otexts.com/fpp3/
+
+## Software & Tools
+- **R Core Team** (2025). *R: A language and environment for statistical computing.* R Foundation for Statistical Computing, Vienna, Austria. https://www.r-project.org/
+
+- **Wickham, H.** (2016). *ggplot2: Elegant Graphics for Data Analysis.* Springer-Verlag New York.
+
+- **RStudio Team** (2025). *RStudio: Integrated Development Environment for R.* https://www.rstudio.com/
+
+## Data Limitations & Simulation Notes
+- **Rescue statistics (Figure 2, Slide 5)**: Simulated based on regional patterns. Actual public records from NPS/emergency services were not readily available in aggregated format.
+- **Tourism market projections (Figure 9, Slide 10)**: Estimated based on regional paddling market ($12M) and projected impact percentages from similar safety intervention studies.
+- **All generated figures (Figures 1-11)**: Original analysis and visualizations created for this project (Bubulka, 2025).
+
+## Important Disclaimer
+This system and all analyses are created for academic and educational purposes only. Forecast data should not be used as the sole basis for life-safety decisions. Always consult official USGS data, local authorities, and professional guidance when planning water activities. This tool is not a substitute for professional judgment or official safety guidance.
 
 ---
 
