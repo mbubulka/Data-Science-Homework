@@ -9,6 +9,13 @@ output:
     slide_level: 1
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(ggplot2)
+library(dplyr)
+library(scales)
+```
+
 # I Almost Died on the Shenandoah River
 
 ## A Real Incident Changed Everything
