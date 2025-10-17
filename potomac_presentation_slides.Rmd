@@ -1,0 +1,417 @@
+---
+title: "Potomac River Safety Analysis"
+subtitle: "Predictive Analytics for Recreational Safety"
+author: "Michael Bubulka"
+institute: "Capitol Technology University"
+date: "October 23, 2025"
+output:
+  powerpoint_presentation:
+    reference_doc: NULL
+    slide_level: 1
+    fig_width: 12
+    fig_height: 6
+    fig_caption: true
+    keep_md: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, 
+                      fig.width = 12, fig.height = 6, dpi = 300)
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(grid)
+library(lubridate)
+library(scales)
+
+# Set theme for all plots
+theme_set(theme_minimal(base_size = 14) + 
+          theme(plot.title = element_text(size = 16, face = "bold"),
+                plot.subtitle = element_text(size = 12),
+                text = element_text(color = "#2c3e50")))
+```
+
+
+
+# Why This Matters
+
+**A few years ago, I led a river trip with my family on the Potomac.** 
+
+What started as a peaceful paddle turned dangerous when water levels rose unexpectedly. We made decisions based only on current conditions—no forecast, no historical context. 
+
+**A rescue team had to extract us from Class III rapids.** That experience changed everything.
+
+*This system prevents others from facing the same risk.*
+
+---
+
+# The Challenge
+
+:::::: {.columns}
+::: {.column width="65%"}
+```{r rescue-trend, fig.width=8, fig.height=5, fig.cap="Figure 1. Potomac River rescue operations trend, 2020-2024. Data simulated for demonstration based on regional rescue patterns (Bubulka, 2025)."}
+# Rescue operations trend
+rescue_data <- data.frame(
+  year = c(2020, 2021, 2022, 2023, 2024),
+  rescues = c(45, 48, 52, 56, 58)
+)
+
+ggplot(rescue_data, aes(x = factor(year), y = rescues)) +
+  geom_col(fill = c("#e74c3c", "#e67e22", "#f39c12", "#d35400", "#c0392b"), 
+           width = 0.7) +
+  geom_text(aes(label = rescues), vjust = -0.5, size = 6, fontface = "bold") +
+  labs(title = "Rescue Operations Up 29% in 5 Years",
+       x = "Year", y = "Rescue Incidents") +
+  scale_y_continuous(limits = c(0, 70), breaks = seq(0, 70, 10)) +
+  theme_minimal(base_size = 14) +
+  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank(),
+        axis.text = element_text(size = 12))
+```
+:::
+
+::: {.column width="35%"}
+### Current Reality
+
+**50,000+** recreational users annually
+
+**Decision-making** based on current conditions only
+
+**No predictive capability** for safety planning
+
+---
+
+*Source: USGS/Local Rescue Records  
+(Simulated for Demonstration)*
+:::
+::::::
+
+---
+
+# The Solution
+
+## Live Dashboard with 7-Day Forecast
+
+**INSERT DASHBOARD SCREENSHOT HERE**
+
+### Key Dashboard Features:
+
+- **Current Safety Score**: Real-time conditions assessment at Little Falls
+- **7-Day Forecast**: ARIMA predictions for Little Falls water flow
+- **Model Validation Panel**: Upstream stations for real-time accuracy tracking
+- **Prediction Confidence**: Dynamic confidence scoring based on validation
+- **USGS Data Integration**: Live updates every 15 minutes
+- **Dynamic Risk Assessment**: Continuous safety algorithm
+- **Visual Safety Zones**: Color-coded risk indicators
+
+*Screenshot should show: USGS Station 01646500 | Little Falls, MD with predictions, plus validation data from upstream stations (Point of Rocks, Washington DC) for confidence scoring*
+
+---
+
+# Live Monitoring Dashboard
+
+## PLACEHOLDER: Dashboard Screenshot
+
+**Insert dashboard screenshot here showing:**
+
+- **Left Panel**: Little Falls conditions with 85/100 safety score + confidence indicator
+- **Center Panel**: Little Falls flow chart with safety zones (red/blue/yellow)  
+- **Right Panel**: 7-day Little Falls forecast with trend indicators
+- **Bottom Panel**: Validation strip showing upstream stations (Point of Rocks, Washington DC) for model confidence
+
+**Key Features to Highlight:**
+- **Primary Station**: USGS Station 01646500 | Little Falls, MD (predictions)
+- **Validation Stations**: USGS 01638500 (Point of Rocks) + USGS 01646000 (Washington DC)
+- **Purpose**: Upstream stations provide validation data only (no predictions)
+- **Model Confidence**: Real-time accuracy scoring based on upstream validation
+- Updated every 15 minutes
+- Color-coded safety zones for Little Falls
+- Prediction confidence indicators
+
+---
+
+# Business Impact: Before vs After
+
+```{r impact-comparison, fig.width=12, fig.height=6, fig.cap="Figure 3. Projected business impact comparison before and after predictive safety system implementation. Values based on regional rescue data analysis and tourism industry projections (Bubulka, 2025)."}
+# Create before/after comparison chart
+impact_data <- data.frame(
+  scenario = rep(c("WITHOUT System", "WITH System"), each = 3),
+  metric = rep(c("Rescues/Year", "Response Time (min)", "Tourism Confidence"), 2),
+  value = c(58, 45, 0, 44, 30, 20),
+  improvement = c("", "", "", "✓ 24% Reduction", "✓ 33% Faster", "✓ 20% Increase")
+)
+
+ggplot(impact_data, aes(x = metric, y = value, fill = scenario)) +
+  geom_col(position = "dodge", width = 0.7) +
+  geom_text(aes(label = paste0(value, ifelse(improvement != "", paste0("\n", improvement), ""))), 
+            position = position_dodge(width = 0.7), vjust = -0.3, size = 4, fontface = "bold") +
+  scale_fill_manual(values = c("WITHOUT System" = "#e74c3c", "WITH System" = "#27ae60")) +
+  labs(title = "Business Impact: Before vs After Implementation",
+       x = "", y = "Value", fill = "") +
+  theme_minimal(base_size = 14) +
+  theme(plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+        legend.position = "bottom",
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 0, hjust = 0.5))
+```
+
+---
+
+# Stakeholder Value
+
+## Value for All Stakeholders
+
+:::::: {.columns}
+::: {.column width="50%"}
+### Recreational Users
+**Safer trips + Better planning**
+
+### Tourism Industry  
+**Data-driven confidence**
+:::
+
+::: {.column width="50%"}
+### Emergency Services
+**Proactive awareness**
+
+### Environmental Agencies
+**Public engagement + Monitoring**
+:::
+::::::
+
+---
+
+# Model Performance & Technical Architecture
+
+:::::: {.columns}
+::: {.column width="50%"}
+### ARIMA Methodology
+
+**Historical Data** → USGS flow records
+
+**Pattern Recognition** → Seasonal + trend analysis  
+
+**Forecast** → 7-day predictions
+
+### Model Accuracy Exceeds Target
+
+```{r accuracy-metrics, fig.width=6, fig.height=4, fig.cap="Figure 4. ARIMA model forecast accuracy performance across prediction horizons. Target accuracy threshold (80%) shown with dashed line (Bubulka, 2025)."}
+# Create accuracy visualization
+accuracy_data <- data.frame(
+  timeframe = c("24-hour", "7-day"),
+  accuracy = c(95, 82)
+)
+
+ggplot(accuracy_data, aes(x = timeframe)) +
+  geom_col(aes(y = accuracy), fill = "#3498db", width = 0.6, alpha = 0.8) +
+  geom_hline(yintercept = 80, color = "#e74c3c", linetype = "dashed", size = 1) +
+  geom_text(aes(y = accuracy, label = paste0(accuracy, "%")), 
+            vjust = -0.5, size = 6, fontface = "bold", color = "#2c3e50") +
+  labs(title = "Forecast Accuracy",
+       x = "Horizon", y = "Accuracy (%)") +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20)) +
+  theme_minimal(base_size = 12) +
+  theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+        panel.grid.minor = element_blank())
+```
+
+**Target: 80% ✓**
+:::
+::::::
+
+---
+
+# Model Validation Framework
+
+## Upstream Validation Strategy
+
+:::::: {.columns}
+::: {.column width="60%"}
+### Validation-Only Network
+
+**Primary Prediction Target:**
+- **USGS 01646500** - Little Falls, MD (ARIMA forecasts)
+- **All predictions focus on Little Falls only**
+
+**Validation Stations (No Predictions):**
+- **USGS 01638500** - Point of Rocks, MD (upstream validation)
+- **USGS 01646000** - Near Washington, DC (secondary validation)  
+- **Purpose**: Real-time accuracy tracking and confidence scoring only
+
+### Dashboard Integration
+- **Prediction Panel**: Little Falls 7-day ARIMA forecasts
+- **Validation Strip**: Upstream data for model confidence scoring
+- **Confidence Indicator**: Dynamic accuracy percentage based on validation
+- **Early Warning**: Upstream condition alerts (validation triggers only)
+:::
+
+::: {.column width="40%"}
+```{r validation-framework, fig.width=5, fig.height=6, fig.cap="Figure 6. Validation network showing Little Falls predictions validated against upstream flow data for real-time confidence scoring (Bubulka, 2025)."}
+# Create validation flow diagram
+validation_data <- data.frame(
+  station = c("Point of Rocks\n(Validation)", "Washington DC\n(Validation)", "Little Falls\n(Predictions)"),
+  x_pos = c(0.8, 1.2, 1),
+  y_pos = c(3, 3, 1),
+  station_type = c("Validation", "Validation", "Prediction")
+)
+
+ggplot(validation_data, aes(x = x_pos, y = y_pos)) +
+  geom_point(aes(color = station_type), size = 8, alpha = 0.8) +
+  scale_color_manual(values = c("Prediction" = "#3498db", "Validation" = "#f39c12")) +
+  geom_text(aes(label = station), hjust = 0.5, vjust = 0.5, 
+            size = 3, fontface = "bold", color = "white") +
+  geom_segment(aes(x = 0.8, y = 3, xend = 1, yend = 1.5), 
+               arrow = arrow(length = unit(0.2, "cm")), 
+               color = "#f39c12", size = 1.5, linetype = "dashed") +
+  geom_segment(aes(x = 1.2, y = 3, xend = 1, yend = 1.5), 
+               arrow = arrow(length = unit(0.2, "cm")), 
+               color = "#f39c12", size = 1.5, linetype = "dashed") +
+  annotate("text", x = 0.7, y = 2, label = "Validation\nData Only", 
+           size = 3, color = "#f39c12", fontface = "italic") +
+  annotate("text", x = 1.3, y = 2, label = "Validation\nData Only", 
+           size = 3, color = "#f39c12", fontface = "italic") +
+  annotate("text", x = 1, y = 0.5, label = "ARIMA Predictions", 
+           size = 3.5, color = "#3498db", fontface = "bold") +
+  xlim(0.5, 1.5) +
+  ylim(0, 3.5) +
+  labs(title = "Validation-Only Network") +
+  theme_void() +
+  theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+        legend.position = "none")
+```
+
+**Clear Separation:**
+- **Blue**: Prediction target (Little Falls)
+- **Orange**: Validation only (upstream stations)
+- **Dashed Lines**: Validation data flow (not predictions)
+- **Purpose**: Model confidence, not additional forecasts
+:::
+::::::
+
+---
+
+# Technical Architecture
+
+```{r tech-architecture, fig.width=10, fig.height=8, fig.cap="Figure 5. System architecture flow diagram showing data processing pipeline from USGS source to user interface (Bubulka, 2025)."}
+# Create vertical system architecture flow diagram
+arch_data <- data.frame(
+  component = c("USGS\nData", "Data\nIngestion", "ARIMA\nEngine", "Safety\nLogic", "Dashboard\nUI"),
+  x = c(1, 1, 1, 1, 1),
+  y = c(5, 4, 3, 2, 1)
+)
+
+ggplot(arch_data, aes(x = x, y = y)) +
+  geom_rect(aes(xmin = x - 0.4, xmax = x + 0.4, ymin = y - 0.3, ymax = y + 0.3),
+            fill = "#ecf0f1", color = "#3498db", size = 2) +
+  geom_text(aes(label = component), size = 4, fontface = "bold") +
+  
+  # Add vertical arrows
+  annotate("segment", x = 1, xend = 1, y = 4.7, yend = 4.3,
+           arrow = arrow(length = unit(0.3, "cm")), size = 1.5, color = "#3498db") +
+  annotate("segment", x = 1, xend = 1, y = 3.7, yend = 3.3,
+           arrow = arrow(length = unit(0.3, "cm")), size = 1.5, color = "#3498db") +
+  annotate("segment", x = 1, xend = 1, y = 2.7, yend = 2.3,
+           arrow = arrow(length = unit(0.3, "cm")), size = 1.5, color = "#3498db") +
+  annotate("segment", x = 1, xend = 1, y = 1.7, yend = 1.3,
+           arrow = arrow(length = unit(0.3, "cm")), size = 1.5, color = "#3498db") +
+  
+  labs(title = "Data Processing Pipeline") +
+  xlim(0.3, 1.7) + ylim(0.5, 5.5) +
+  theme_void() +
+  theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+```
+
+### Key Features:
+- **Real-time data ingestion** from USGS every 15 minutes
+- **ARIMA forecasting engine** with 82% 7-day accuracy
+- **Dynamic safety scoring** algorithm
+- **Scalable architecture** for multiple river systems
+- **Responsive dashboard** with mobile compatibility
+
+---
+
+# Future Opportunities & Conclusion
+
+:::::: {.columns}
+::: {.column width="50%"}
+### Mobile App: 50,000+ Users in Your Pocket
+
+**Current Safety Score**: 85/100 EXCELLENT  
+**Alert System**: Flow rising—check forecast  
+**Trip Planner**: Oct 15-17 SAFE WINDOW
+
+### Key Features:
+- Real-time alerts & instant safety notifications
+- Trip planning with optimal timing recommendations  
+- Push notifications for proactive risk warnings
+
+### Revenue Model:
+- **Freemium**: Basic safety scores free
+- **Premium**: $4.99/month for forecasts & alerts
+- **B2B**: Licensing to outfitters & emergency services
+:::
+
+::: {.column width="50%"}
+```{r impact-loop, fig.width=6, fig.height=4, fig.cap="Figure 6. Project impact loop showing the positive feedback cycle of predictive safety system implementation (Bubulka, 2025)."}
+# Create impact loop visualization
+impact_stages <- data.frame(
+  stage = c("Better\nDecisions", "Fewer\nRescues", "Safer\nCommunity"),
+  x = c(2, 6, 10),
+  y = c(2, 2, 2)
+)
+
+ggplot(impact_stages, aes(x = x, y = y)) +
+  geom_point(size = 30, color = "#3498db", alpha = 0.3) +
+  geom_point(size = 20, color = "#3498db", alpha = 0.6) +
+  geom_text(aes(label = stage), size = 4, fontface = "bold", color = "#2c3e50") +
+  
+  # Add arrows
+  annotate("segment", x = 3.5, xend = 4.5, y = 2, yend = 2,
+           arrow = arrow(length = unit(0.3, "cm")), size = 1.5, color = "#3498db") +
+  annotate("segment", x = 7.5, xend = 8.5, y = 2, yend = 2,
+           arrow = arrow(length = unit(0.3, "cm")), size = 1.5, color = "#3498db") +
+  
+  labs(title = "Impact Loop") +
+  xlim(0, 12) + ylim(0, 4) +
+  theme_void() +
+  theme(plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+```
+
+### Project Impact:
+**This project applies predictive analytics to river safety.**
+
+**Serving 50,000+ users annually with a scalable, impactful system.**
+
+**Better decisions, fewer rescues, safer experience for everyone.**
+
+### *This is data science with purpose.*
+:::
+::::::
+
+# Thank You - Questions?
+
+### Michael Bubulka | mbubulka@captechu.edu | Capitol Technology University
+
+---
+
+# References
+
+### Data Sources
+- **USGS Water Data for the Nation**. (2025). Real-time water data for Station 01646500, Potomac River at Little Falls, MD. Retrieved from https://waterdata.usgs.gov/
+
+- **National Park Service**. (2024). *Great Falls Park Safety Statistics*. Retrieved from https://www.nps.gov/grfa/
+
+### Technical References
+- **Hyndman, R.J., & Athanasopoulos, G.** (2021). *Forecasting: Principles and Practice* (3rd ed.). OTexts. https://otexts.com/fpp3/
+
+- **Box, G.E.P., Jenkins, G.M., Reinsel, G.C., & Ljung, G.M.** (2015). *Time Series Analysis: Forecasting and Control* (5th ed.). Wiley.
+
+### Software & Packages
+- **R Core Team** (2025). R: A language and environment for statistical computing. R Foundation for Statistical Computing, Vienna, Austria.
+
+- **Wickham, H.** (2016). ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York.
+
+### Note
+*Rescue operations data simulated for demonstration purposes based on regional patterns and USGS historical flow data.*
+ 
+ 

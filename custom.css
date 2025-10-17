@@ -1,0 +1,382 @@
+/* Custom CSS for Potomac River Safety Analysis Presentation */
+
+/* Base styling */
+.remark-slide-content {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 18px;
+  line-height: 1.4;
+  color: #2c3e50;
+  padding: 2em;
+}
+
+/* Title slide styling */
+.title-slide {
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  color: white;
+}
+
+.title-slide h1 {
+  font-size: 3em;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.title-slide h2 {
+  font-size: 1.8em;
+  font-weight: 300;
+  margin-bottom: 1.5em;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.title-slide h3 {
+  font-size: 1.2em;
+  font-weight: 400;
+  margin: 0.3em 0;
+}
+
+/* Layout containers */
+.container {
+  display: grid;
+  gap: 20px;
+  height: 500px;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: 70% 30%;
+  gap: 20px;
+  height: 450px;
+}
+
+.three-column {
+  display: grid;
+  grid-template-columns: 30% 35% 35%;
+  gap: 15px;
+  height: 400px;
+}
+
+.split-screen {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  gap: 30px;
+  height: 450px;
+}
+
+.equal-split {
+  display: grid;
+  grid-template-columns: 45% 10% 45%;
+  gap: 10px;
+  height: 400px;
+  align-items: center;
+}
+
+.four-quadrant {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  grid-template-rows: 50% 50%;
+  gap: 15px;
+  height: 400px;
+  margin-top: 20px;
+}
+
+/* Text and content boxes */
+.text-box {
+  padding: 20px;
+  margin: 0;
+  overflow: hidden;
+  word-wrap: break-word;
+  background: rgba(255,255,255,0.95);
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Typography */
+.metric-large {
+  font-size: 48px;
+  font-weight: bold;
+  line-height: 1.2;
+  margin: 15px 0;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.metric-medium {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 8px 0;
+  color: #2c3e50;
+}
+
+/* Component styles */
+.pillar {
+  text-align: center;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 2px solid #e9ecef;
+  transition: transform 0.3s ease;
+}
+
+.pillar:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.pillar h3 {
+  font-size: 1.2em;
+  margin: 10px 0 5px 0;
+  color: #2c3e50;
+}
+
+.quadrant {
+  border: 2px solid #ccc;
+  padding: 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.quadrant:hover {
+  background: #e9ecef;
+  border-color: #3498db;
+}
+
+.quadrant h3 {
+  font-size: 1.1em;
+  margin: 10px 0 5px 0;
+  color: #2c3e50;
+}
+
+/* Before/After boxes */
+.before-box {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.after-box {
+  background: linear-gradient(135deg, #27ae60, #229954);
+  color: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+.before-box h3, .after-box h3 {
+  margin-top: 0;
+  font-size: 1.3em;
+  border-bottom: 2px solid rgba(255,255,255,0.3);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.arrow-right {
+  font-size: 60px;
+  color: #3498db;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Flow boxes for technical architecture */
+.flow-box {
+  width: 18%;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #3498db;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+  margin: 0 1%;
+  font-size: 0.9em;
+  text-align: center;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.flow-box:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+/* Phone mockups */
+.phone-mockup {
+  width: 150px;
+  height: 280px;
+  border: 3px solid #2c3e50;
+  border-radius: 20px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  font-size: 0.9em;
+  text-align: center;
+  padding: 15px;
+}
+
+/* Impact circles */
+.impact-circle {
+  width: 150px;
+  height: 150px;
+  border: 4px solid #3498db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+  font-weight: bold;
+  text-align: center;
+  margin: 0 20px;
+  font-size: 1em;
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+  transition: all 0.3s ease;
+}
+
+.impact-circle:hover {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+/* Progress bars */
+.progress-bar {
+  height: 20px;
+  background: #ecf0f1;
+  border-radius: 10px;
+  margin: 5px 0;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 1s ease;
+}
+
+/* Footnotes and small text */
+.footnote {
+  position: absolute;
+  bottom: 2em;
+  left: 2em;
+  font-size: 0.8em;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .remark-slide-content {
+    font-size: 16px;
+    padding: 1.5em;
+  }
+  
+  .metric-large {
+    font-size: 36px;
+  }
+  
+  .four-quadrant {
+    grid-template-columns: 100%;
+    grid-template-rows: auto;
+    height: auto;
+  }
+  
+  .phone-mockup {
+    width: 120px;
+    height: 240px;
+  }
+}
+
+/* Animation classes */
+.fade-in {
+  animation: fadeIn 0.8s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.8s ease-out;
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Ensure no overlapping */
+.remark-slide-content > * {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Code blocks (if any) */
+.remark-code {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  padding: 10px;
+  border-left: 4px solid #3498db;
+}
+
+/* Tables (if any) */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background: #3498db;
+  color: white;
+  font-weight: bold;
+}
+
+/* Ensure images don't overflow */
+img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}

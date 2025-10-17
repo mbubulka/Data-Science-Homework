@@ -8,7 +8,7 @@ library(lubridate)
 # Enhanced operational predictor with real-time capabilities
 create_enhanced_predictor <- function() {
   
-  # Real-time data fetcher with robust error handling
+  # Enhanced multi-gauge data fetcher with validation
   fetch_realtime_data <- function(site_id = "01646500", days_back = 30) {
     tryCatch({
       cat("🔄 Fetching real-time USGS data...\n")
@@ -59,6 +59,73 @@ create_enhanced_predictor <- function() {
       attr(synthetic_data, "data_source") <- "synthetic"
       return(synthetic_data)
     })
+  }
+  
+  # Fetch upstream validation data
+  fetch_upstream_validation <- function(days_back = 7) {
+    upstream_sites <- list(
+      point_of_rocks = "01638500",    # Point of Rocks, MD (upstream)
+      harpers_ferry = "01636500"      # Harpers Ferry, WV (further upstream)
+    )
+    
+    validation_data <- list()
+    
+    for(site_name in names(upstream_sites)) {
+      site_id <- upstream_sites[[site_name]]
+      cat("🔄 Fetching validation data from", site_name, "(", site_id, ")...\n")
+      
+      tryCatch({
+        site_data <- fetch_realtime_data(site_id, days_back)
+        if(nrow(site_data) > 0) {
+          validation_data[[site_name]] <- site_data
+          cat("✅", site_name, "data retrieved:", nrow(site_data), "points\n")
+        }
+      }, error = function(e) {
+        cat("⚠️", site_name, "validation data unavailable\n")
+        validation_data[[site_name]] <- NULL
+      })
+    }
+    
+    return(validation_data)
+  }
+  
+  # Validate predictions using upstream gauges
+  validate_predictions <- function(little_falls_flow, upstream_data) {
+    validation_results <- list()
+    
+    if(!is.null(upstream_data$point_of_rocks) && nrow(upstream_data$point_of_rocks) > 0) {
+      por_flow <- upstream_data$point_of_rocks$discharge_cfs[1]
+      
+      # Point of Rocks typically runs 20-30% higher than Little Falls
+      expected_lf_from_por <- por_flow * 0.75  # Conversion factor
+      prediction_accuracy <- abs(little_falls_flow - expected_lf_from_por) / little_falls_flow * 100
+      
+      validation_results$point_of_rocks <- list(
+        upstream_flow = por_flow,
+        expected_little_falls = expected_lf_from_por,
+        actual_little_falls = little_falls_flow,
+        accuracy_percent = 100 - prediction_accuracy,
+        status = if(prediction_accuracy < 15) "GOOD" else if(prediction_accuracy < 30) "FAIR" else "POOR"
+      )
+    }
+    
+    if(!is.null(upstream_data$harpers_ferry) && nrow(upstream_data$harpers_ferry) > 0) {
+      hf_flow <- upstream_data$harpers_ferry$discharge_cfs[1]
+      
+      # Harpers Ferry typically runs 40-60% higher than Little Falls (includes Shenandoah)
+      expected_lf_from_hf <- hf_flow * 0.6  # Conversion factor
+      prediction_accuracy <- abs(little_falls_flow - expected_lf_from_hf) / little_falls_flow * 100
+      
+      validation_results$harpers_ferry <- list(
+        upstream_flow = hf_flow,
+        expected_little_falls = expected_lf_from_hf,
+        actual_little_falls = little_falls_flow,
+        accuracy_percent = 100 - prediction_accuracy,
+        status = if(prediction_accuracy < 15) "GOOD" else if(prediction_accuracy < 30) "FAIR" else "POOR"
+      )
+    }
+    
+    return(validation_results)
   }
   
 # Enhanced safety scoring with detailed breakdown - LITTLE FALLS SPECIFIC
@@ -159,6 +226,16 @@ calculate_safety_metrics <- function(flow_cfs, trend_cfs = 0) {
       return(NULL)
     }
     
+    # Fetch upstream validation data
+    cat("\n🔍 FETCHING UPSTREAM VALIDATION DATA\n")
+    upstream_data <- fetch_upstream_validation()
+    
+    # Calculate current flow
+    recent_flow <- current_data$discharge_cfs[1]
+    
+    # Validate predictions using upstream gauges
+    validation_results <- validate_predictions(recent_flow, upstream_data)
+    
     # Calculate metrics
     recent_flow <- current_data$discharge_cfs[1]
     
@@ -209,6 +286,31 @@ calculate_safety_metrics <- function(flow_cfs, trend_cfs = 0) {
       cat("\n   Trend Stability:", safety_metrics$trend_score, "/30") 
       cat("\n   Seasonal Factor:", safety_metrics$seasonal_score, "/20")
       cat("\n   Experience Bonus:", safety_metrics$experience_score, "/10")
+      
+      # Display validation results
+      if(length(validation_results) > 0) {
+        cat("\n\n🔍 UPSTREAM VALIDATION:")
+        
+        if(!is.null(validation_results$point_of_rocks)) {
+          por <- validation_results$point_of_rocks
+          cat("\n   📍 Point of Rocks:")
+          cat(sprintf("\n      Upstream: %d cfs", round(por$upstream_flow)))
+          cat(sprintf("\n      Expected LF: %d cfs", round(por$expected_little_falls)))
+          cat(sprintf("\n      Actual LF: %d cfs", round(por$actual_little_falls)))
+          cat(sprintf("\n      Accuracy: %.1f%% (%s)", por$accuracy_percent, por$status))
+        }
+        
+        if(!is.null(validation_results$harpers_ferry)) {
+          hf <- validation_results$harpers_ferry
+          cat("\n   📍 Harpers Ferry:")
+          cat(sprintf("\n      Upstream: %d cfs", round(hf$upstream_flow)))
+          cat(sprintf("\n      Expected LF: %d cfs", round(hf$expected_little_falls)))
+          cat(sprintf("\n      Actual LF: %d cfs", round(hf$actual_little_falls)))
+          cat(sprintf("\n      Accuracy: %.1f%% (%s)", hf$accuracy_percent, hf$status))
+        }
+      } else {
+        cat("\n\n🔍 UPSTREAM VALIDATION: No upstream data available")
+      }
     }
     
     cat("\n\n📅 7-DAY FORECAST:")
@@ -241,6 +343,8 @@ calculate_safety_metrics <- function(flow_cfs, trend_cfs = 0) {
       ),
       detailed_scoring = safety_metrics,
       forecast = forecast_data,
+      validation_results = validation_results,
+      upstream_data = upstream_data,
       data_source = data_source_type
     ))
   }
