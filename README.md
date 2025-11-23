@@ -12,7 +12,7 @@ Sophisticated real-time analysis system combining USGS hydrological data with ad
 ## 🔬 Technical Features
 
 - **Real-time USGS API integration** with robust error handling
-- **Advanced 7-day ARIMA forecasting** with multiple data sources
+- **Advanced 7-day forecasting** with multiple data sources
 - **Multi-component safety scoring algorithm** calibrated for Little Falls
 - **Interactive professional dashboards** with responsive design
 - **Comprehensive statistical analysis** with APA-style reporting
