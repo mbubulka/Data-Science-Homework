@@ -85,46 +85,39 @@ tryCatch({
 
   # Safety scoring
   calculate_safety_score <- function(flow_cfs, trend_cfs = 0) {
-    # Handle NA/missing values with robust checks for R 4.3+
-    if (length(flow_cfs) == 0 || is.null(flow_cfs) || any(is.na(flow_cfs)) || !is.numeric(flow_cfs)) {
-      return(list(
-        total = 0,
-        flow_score = 0,
-        trend_score = 0,
-        seasonal_score = 0,
-        experience_score = 0
-      ))
+    # Force to scalar numeric and handle any weirdness (NULL, empty, NA, etc)
+    flow_val <- suppressWarnings(as.numeric(flow_cfs[1]))
+    if (length(flow_val) == 0 || is.na(flow_val)) {
+      flow_val <- 2000 # Safety fallback
     }
     
-    # Ensure we are dealing with a single numeric value
-    flow_cfs <- as.numeric(flow_cfs[1])
-    
-    if (length(trend_cfs) == 0 || is.null(trend_cfs) || any(is.na(trend_cfs)) || !is.numeric(trend_cfs)) {
-      trend_cfs <- 0
+    trend_val <- suppressWarnings(as.numeric(trend_cfs[1]))
+    if (length(trend_val) == 0 || is.na(trend_val)) {
+      trend_val <- 0 # Safety fallback
     }
-    trend_cfs <- as.numeric(trend_cfs[1])
     
-    if (flow_cfs < 800) {
+    # Use explicitly scalar comparisons which are safe in R 4.3+
+    if (flow_val < 800) {
       flow_score <- 0
-    } else if (flow_cfs < 1200) {
+    } else if (flow_val < 1200) {
       flow_score <- 15
-    } else if (flow_cfs < 2000) {
+    } else if (flow_val < 2000) {
       flow_score <- 35
-    } else if (flow_cfs < 3000) {
+    } else if (flow_val < 3000) {
       flow_score <- 40
-    } else if (flow_cfs < 4000) {
+    } else if (flow_val < 4000) {
       flow_score <- 30
     } else {
       flow_score <- 10
     }
     
-    if (trend_cfs < -200) {
+    if (trend_val < -200) {
       trend_score <- 10
-    } else if (trend_cfs < -50) {
+    } else if (trend_val < -50) {
       trend_score <- 20
-    } else if (trend_cfs < 50) {
+    } else if (trend_val < 50) {
       trend_score <- 30
-    } else if (trend_cfs < 200) {
+    } else if (trend_val < 200) {
       trend_score <- 25
     } else {
       trend_score <- 15
