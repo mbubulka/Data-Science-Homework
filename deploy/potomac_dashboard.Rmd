@@ -9,189 +9,293 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-library(flexdashboard)
-library(ggplot2)
-library(dplyr)
-library(DT)
-library(plotly)
-
-# Try to load advanced packages
-use_advanced_features <- TRUE
+# Wrap entire setup in try-catch for robustness
 tryCatch({
-  library(dataRetrieval)
-  library(lubridate)
-}, error = function(e) {
-  use_advanced_features <<- FALSE
-})
+  library(flexdashboard)
+  library(ggplot2)
+  library(dplyr)
+  library(DT)
+  library(plotly)
 
-# Get Potomac data
-get_potomac_data <- function() {
-  if (!use_advanced_features) {
-    base_flow <- sample(c(1800, 2200, 2600, 3000, 2400), 1)
-    return(list(
-      flow_cfs = base_flow + rnorm(1, 0, 200),
-      trend_cfs = rnorm(1, 0, 75),
-      data_source = "demo_mode",
-      success = TRUE,
-      timestamp = Sys.time()
-    ))
-  }
-  
+  # Try to load advanced packages
+  use_advanced_features <- TRUE
   tryCatch({
-    current_data <- dataRetrieval::readNWISuv(
-      siteNumbers = "01646500",
-      parameterCd = "00060",
-      startDate = Sys.Date() - 7,
-      endDate = Sys.Date()
-    )
-    
-    if(nrow(current_data) > 0) {
-      flows <- current_data$X_00060_00000
-      current_flow <- tail(flows, 1)
-      recent_flows <- tail(flows, min(96, length(flows)))
-      trend_cfs <- if(length(recent_flows) > 10) {
-        (tail(recent_flows, 1) - head(recent_flows, 1)) / length(recent_flows) * 96
-      } else { 0 }
-      
+    library(dataRetrieval)
+    library(lubridate)
+  }, error = function(e) {
+    use_advanced_features <<- FALSE
+  })
+
+  # Get Potomac data
+  get_potomac_data <- function() {
+    if (!use_advanced_features) {
+      base_flow <- sample(c(1800, 2200, 2600, 3000, 2400), 1)
       return(list(
-        flow_cfs = current_flow,
-        trend_cfs = trend_cfs,
-        data_source = "USGS_live",
+        flow_cfs = base_flow + rnorm(1, 0, 200),
+        trend_cfs = rnorm(1, 0, 75),
+        data_source = "demo_mode",
         success = TRUE,
         timestamp = Sys.time()
       ))
     }
-  }, error = function(e) {
-    # Fallback to demo
-  })
-  
-  # Demo fallback
-  base_flow <- sample(c(1800, 2200, 2600, 3000, 2400), 1)
-  return(list(
-    flow_cfs = base_flow + rnorm(1, 0, 200),
-    trend_cfs = rnorm(1, 0, 75),
-    data_source = "demo_fallback",
-    success = TRUE,
-    timestamp = Sys.time()
-  ))
-}
-
-# Safety scoring
-calculate_safety_score <- function(flow_cfs, trend_cfs = 0) {
-  if (flow_cfs < 800) {
-    flow_score <- 0
-  } else if (flow_cfs < 1200) {
-    flow_score <- 15
-  } else if (flow_cfs < 2000) {
-    flow_score <- 35
-  } else if (flow_cfs < 3000) {
-    flow_score <- 40
-  } else if (flow_cfs < 4000) {
-    flow_score <- 30
-  } else {
-    flow_score <- 10
-  }
-  
-  if (trend_cfs < -200) {
-    trend_score <- 10
-  } else if (trend_cfs < -50) {
-    trend_score <- 20
-  } else if (trend_cfs < 50) {
-    trend_score <- 30
-  } else if (trend_cfs < 200) {
-    trend_score <- 25
-  } else {
-    trend_score <- 15
-  }
-  
-  current_month <- as.numeric(format(Sys.Date(), "%m"))
-  if (current_month %in% c(12, 1, 2)) {
-    seasonal_score <- 10
-  } else if (current_month %in% c(3, 4, 5)) {
-    seasonal_score <- 20
-  } else if (current_month %in% c(6, 7, 8)) {
-    seasonal_score <- 15
-  } else {
-    seasonal_score <- 18
-  }
-  
-  experience_score <- 5
-  total_score <- flow_score + trend_score + seasonal_score + experience_score
-  
-  list(
-    total = min(total_score, 100),
-    flow_score = flow_score,
-    trend_score = trend_score,
-    seasonal_score = seasonal_score,
-    experience_score = experience_score
-  )
-}
-
-# Generate forecast
-generate_forecast <- function(base_flow, base_trend = 0) {
-  flows <- numeric(7)
-  flows[1] <- base_flow
-  
-  for(i in 2:7) {
-    trend_component <- base_trend * 0.1
-    seasonal_component <- sin(2 * pi * i / 365) * 30
-    mean_reversion <- (2000 - flows[i-1]) * 0.02
-    random_component <- rnorm(1, mean = mean_reversion, sd = 150)
-    change <- trend_component + seasonal_component + random_component
-    flows[i] <- max(500, flows[i-1] + change)
-  }
-  
-  scores <- numeric(7)
-  risks <- character(7)
-  
-  for(i in 1:7) {
-    trend_for_day <- if(i == 1) base_trend else (flows[i] - flows[max(1, i-1)]) * 96
-    safety_result <- calculate_safety_score(flows[i], trend_for_day)
-    scores[i] <- safety_result$total
     
-    if (scores[i] >= 80) {
-      risks[i] <- "EXCELLENT"
-    } else if (scores[i] >= 65) {
-      risks[i] <- "GOOD"
-    } else if (scores[i] >= 45) {
-      risks[i] <- "MODERATE"
-    } else {
-      risks[i] <- "POOR"
-    }
+    tryCatch({
+      current_data <- dataRetrieval::readNWISuv(
+        siteNumbers = "01646500",
+        parameterCd = "00060",
+        startDate = Sys.Date() - 7,
+        endDate = Sys.Date()
+      )
+      
+      if(nrow(current_data) > 0) {
+        flows <- current_data$X_00060_00000
+        # Remove NA values before processing
+        flows <- flows[!is.na(flows)]
+        
+        if(length(flows) > 0) {
+          current_flow <- tail(flows, 1)
+          recent_flows <- tail(flows, min(96, length(flows)))
+          trend_cfs <- if(length(recent_flows) > 10) {
+            (tail(recent_flows, 1) - head(recent_flows, 1)) / length(recent_flows) * 96
+          } else { 0 }
+          
+          return(list(
+            flow_cfs = current_flow,
+            trend_cfs = trend_cfs,
+            data_source = "USGS_live",
+            success = TRUE,
+            timestamp = Sys.time()
+          ))
+        }
+      }
+    }, error = function(e) {
+      # Fallback to demo
+    })
+    
+    # Demo fallback
+    base_flow <- sample(c(1800, 2200, 2600, 3000, 2400), 1)
+    return(list(
+      flow_cfs = base_flow + rnorm(1, 0, 200),
+      trend_cfs = rnorm(1, 0, 75),
+      data_source = "demo_fallback",
+      success = TRUE,
+      timestamp = Sys.time()
+    ))
   }
+
+  # Safety scoring
+  calculate_safety_score <- function(flow_cfs, trend_cfs = 0) {
+    # Handle NA/missing values with robust checks for R 4.3+
+    if (length(flow_cfs) == 0 || is.null(flow_cfs) || any(is.na(flow_cfs)) || !is.numeric(flow_cfs)) {
+      return(list(
+        total = 0,
+        flow_score = 0,
+        trend_score = 0,
+        seasonal_score = 0,
+        experience_score = 0
+      ))
+    }
+    
+    # Ensure we are dealing with a single numeric value
+    flow_cfs <- as.numeric(flow_cfs[1])
+    
+    if (length(trend_cfs) == 0 || is.null(trend_cfs) || any(is.na(trend_cfs)) || !is.numeric(trend_cfs)) {
+      trend_cfs <- 0
+    }
+    trend_cfs <- as.numeric(trend_cfs[1])
+    
+    if (flow_cfs < 800) {
+      flow_score <- 0
+    } else if (flow_cfs < 1200) {
+      flow_score <- 15
+    } else if (flow_cfs < 2000) {
+      flow_score <- 35
+    } else if (flow_cfs < 3000) {
+      flow_score <- 40
+    } else if (flow_cfs < 4000) {
+      flow_score <- 30
+    } else {
+      flow_score <- 10
+    }
+    
+    if (trend_cfs < -200) {
+      trend_score <- 10
+    } else if (trend_cfs < -50) {
+      trend_score <- 20
+    } else if (trend_cfs < 50) {
+      trend_score <- 30
+    } else if (trend_cfs < 200) {
+      trend_score <- 25
+    } else {
+      trend_score <- 15
+    }
+    
+    current_month <- as.numeric(format(Sys.Date(), "%m"))
+    if (current_month %in% c(12, 1, 2)) {
+      seasonal_score <- 10
+    } else if (current_month %in% c(3, 4, 5)) {
+      seasonal_score <- 20
+    } else if (current_month %in% c(6, 7, 8)) {
+      seasonal_score <- 15
+    } else {
+      seasonal_score <- 18
+    }
+    
+    experience_score <- 5
+    total_score <- flow_score + trend_score + seasonal_score + experience_score
+    
+    list(
+      total = min(total_score, 100),
+      flow_score = flow_score,
+      trend_score = trend_score,
+      seasonal_score = seasonal_score,
+      experience_score = experience_score
+    )
+  }
+
+  # Generate forecast
+  generate_forecast <- function(base_flow, base_trend = 0) {
+    # Validate inputs with robust checks
+    if (length(base_flow) == 0 || is.null(base_flow) || any(is.na(base_flow)) || !is.numeric(base_flow)) {
+      base_flow <- 2000
+    } else {
+      base_flow <- as.numeric(base_flow[1])
+    }
+    
+    if (length(base_trend) == 0 || is.null(base_trend) || any(is.na(base_trend)) || !is.numeric(base_trend)) {
+      base_trend <- 0
+    } else {
+      base_trend <- as.numeric(base_trend[1])
+    }
+    
+    flows <- numeric(7)
+    flows[1] <- base_flow
+    
+    for(i in 2:7) {
+      trend_component <- base_trend * 0.1
+      seasonal_component <- sin(2 * pi * i / 365) * 30
+      mean_reversion <- (2000 - flows[i-1]) * 0.02
+      random_component <- rnorm(1, mean = mean_reversion, sd = 150)
+      change <- trend_component + seasonal_component + random_component
+      flows[i] <- max(500, flows[i-1] + change)
+    }
+    
+    scores <- numeric(7)
+    risks <- character(7)
+    
+    for(i in 1:7) {
+      trend_for_day <- if(i == 1) base_trend else (flows[i] - flows[max(1, i-1)]) * 96
+      safety_result <- calculate_safety_score(flows[i], trend_for_day)
+      scores[i] <- safety_result$total
+      
+      if (scores[i] >= 80) {
+        risks[i] <- "EXCELLENT"
+      } else if (scores[i] >= 65) {
+        risks[i] <- "GOOD"
+      } else if (scores[i] >= 45) {
+        risks[i] <- "MODERATE"
+      } else {
+        risks[i] <- "POOR"
+      }
+    }
+    
+    data.frame(
+      day = 1:7,
+      predicted_flow = round(flows, 0),
+      safety_score = round(scores, 0),
+      risk_level = risks,
+      trend_indicator = c("Current", rep("Forecast", 6))
+    )
+  }
+
+  # Get current analysis
+  data_result <- get_potomac_data()
+
+  # Ensure we have a valid result object
+  if (is.null(data_result)) {
+    data_result <- list(
+      flow_cfs = 2000,
+      trend_cfs = 0,
+      data_source = "error_fallback",
+      success = FALSE,
+      timestamp = Sys.time()
+    )
+  }
+
+  # Ensure we have valid numeric data (robust to R 4.3+ stricter if behavior)
+  if (is.null(data_result$flow_cfs) || length(data_result$flow_cfs) == 0 || any(is.na(data_result$flow_cfs))) {
+    data_result$flow_cfs <- 2000  # Default fallback value
+  }
+  if (is.null(data_result$trend_cfs) || length(data_result$trend_cfs) == 0 || any(is.na(data_result$trend_cfs))) {
+    data_result$trend_cfs <- 0  # Default fallback value
+  }
+  if (is.null(data_result$timestamp)) {
+    data_result$timestamp <- Sys.time()
+  }
+  if (is.null(data_result$data_source)) {
+    data_result$data_source <- "unknown"
+  }
+
+  safety_metrics <- calculate_safety_score(data_result$flow_cfs, data_result$trend_cfs)
+
+  if (safety_metrics$total >= 80) {
+    risk_level <- "EXCELLENT"
+  } else if (safety_metrics$total >= 65) {
+    risk_level <- "GOOD"
+  } else if (safety_metrics$total >= 45) {
+    risk_level <- "MODERATE"
+  } else {
+    risk_level <- "POOR"
+  }
+
+  current_conditions <- list(
+    flow_cfs = round(data_result$flow_cfs, 0),
+    safety_score = safety_metrics$total,
+    risk_level = risk_level,
+    trend_cfs = round(data_result$trend_cfs, 1),
+    timestamp = data_result$timestamp
+  )
+
+  forecast_data <- generate_forecast(data_result$flow_cfs, data_result$trend_cfs)
+
+}, error = function(e) {
+  # Emergency fallback if entire setup fails
+  cat("Setup error:", as.character(e), "\n")
   
-  data.frame(
+  data_result <<- list(
+    flow_cfs = 2000,
+    trend_cfs = 0,
+    data_source = "emergency_fallback",
+    success = FALSE,
+    timestamp = Sys.time()
+  )
+  
+  safety_metrics <<- list(
+    total = 50,
+    flow_score = 20,
+    trend_score = 15,
+    seasonal_score = 10,
+    experience_score = 5
+  )
+  
+  risk_level <<- "MODERATE"
+  
+  current_conditions <<- list(
+    flow_cfs = 2000,
+    safety_score = 50,
+    risk_level = "MODERATE",
+    trend_cfs = 0,
+    timestamp = Sys.time()
+  )
+  
+  forecast_data <<- data.frame(
     day = 1:7,
-    predicted_flow = round(flows, 0),
-    safety_score = round(scores, 0),
-    risk_level = risks,
+    predicted_flow = seq(2000, 2600, length.out = 7),
+    safety_score = rep(50, 7),
+    risk_level = rep("MODERATE", 7),
     trend_indicator = c("Current", rep("Forecast", 6))
   )
-}
-
-# Get current analysis
-data_result <- get_potomac_data()
-safety_metrics <- calculate_safety_score(data_result$flow_cfs, data_result$trend_cfs)
-
-if (safety_metrics$total >= 80) {
-  risk_level <- "EXCELLENT"
-} else if (safety_metrics$total >= 65) {
-  risk_level <- "GOOD"
-} else if (safety_metrics$total >= 45) {
-  risk_level <- "MODERATE"
-} else {
-  risk_level <- "POOR"
-}
-
-current_conditions <- list(
-  flow_cfs = round(data_result$flow_cfs, 0),
-  safety_score = safety_metrics$total,
-  risk_level = risk_level,
-  trend_cfs = round(data_result$trend_cfs, 1),
-  timestamp = data_result$timestamp
-)
-
-forecast_data <- generate_forecast(data_result$flow_cfs, data_result$trend_cfs)
+})
 ```
 
 # Potomac River Safety Dashboard {.sidebar}
