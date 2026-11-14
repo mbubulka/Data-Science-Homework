@@ -1,0 +1,87 @@
+/* Custom CSS for Potomac Dashboard - bubulkaanalytics.com Integration */
+
+/* Dashboard-wide styling */
+.chart-title {
+  color: #2c3e50 !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+}
+
+.value-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+  transition: all 0.3s ease !important;
+}
+
+.value-box:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2) !important;
+}
+
+/* Flexdashboard specific styling */
+.navbar {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%) !important;
+  border-bottom: 2px solid #3498db !important;
+}
+
+.navbar-brand {
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+/* Chart containers */
+.chart-wrapper {
+  background: white !important;
+  border-radius: 8px !important;
+  padding: 15px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Sidebar styling */
+.section.sidebar {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  border-right: 2px solid #dee2e6 !important;
+  padding: 20px !important;
+}
+
+/* Table styling */
+.dataTables_wrapper {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.dataTables_wrapper table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.dataTables_wrapper th {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  border: none !important;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .chart-wrapper { padding: 10px !important; }
+  .section.sidebar { padding: 15px !important; }
+}
+
+/* Professional color scheme */
+.excellent { color: #27ae60 !important; font-weight: bold !important; }
+.good { color: #f39c12 !important; font-weight: bold !important; }
+.moderate { color: #e67e22 !important; font-weight: bold !important; }
+.poor { color: #e74c3c !important; font-weight: bold !important; }
+
+/* Integration branding */
+.portfolio-link {
+  font-size: 12px !important;
+  color: #6c757d !important;
+  font-style: italic !important;
+  margin-top: 10px !important;
+}
